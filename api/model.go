@@ -4,9 +4,9 @@ import "github.com/gin-gonic/gin"
 
 type User struct {
 	ID       uint   `json:"id" gorm:"primaryKey"`
-	Name     string `json:"name"`
-	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
+	Name     string `json:"name" gorm:"not null"`
+	Email    string `json:"email" gorm:"unique;not null"`
+	Password string `json:"password" gorm:"not null"`
 }
 
 type Todo struct {
