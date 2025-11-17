@@ -2,15 +2,17 @@ package utils
 
 import (
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateToken(ttl time.Duration, payload any, secretJWTKey string) (string, error) {
+func GenerateToken(payload any, secretJWTKey string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 
 	now := time.Now().UTC()
+	ttl, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY"))
 	claims := token.Claims.(jwt.MapClaims)
 
 	claims["sub"] = payload

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
+	"strings"
 	"todo_list_api/utils"
 
 	"github.com/gin-gonic/gin"
@@ -41,12 +41,36 @@ func RegisterUser(c *gin.Context) {
 
 	DB.Create(&user)
 
-	// Generate JWT token
-	// TODO: Avoid parsing expiry on every request
-	expiry, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY"))
-	token, _ := utils.GenerateToken(expiry, user.ID, os.Getenv("TOKEN_SECRET"))
-
+	token, _ := utils.GenerateToken(user.ID, os.Getenv("TOKEN_SECRET"))
 	ResponseJSON(c, http.StatusCreated, "User registration successful", token)
+}
+
+func LoginUser(c *gin.Context) {
+	var loginInput LoginInput
+
+	// Bind the request body
+	if err := c.ShouldBindJSON(&loginInput); err != nil {
+		ResponseJSON(c, http.StatusBadRequest, "Invalid input", nil)
+		return
+	}
+
+	var user User
+
+	// Check if email exists in database
+	result := DB.First(&user, "email = ?", strings.ToLower(loginInput.Email))
+	if result.Error != nil {
+		ResponseJSON(c, http.StatusBadRequest, "Invalid email or password", nil)
+		return
+	}
+
+	// Check if password matches
+	if !utils.VerifyPassword(user.Password, loginInput.Password) {
+		ResponseJSON(c, http.StatusBadRequest, "Invalid email or password", nil)
+		return
+	}
+
+	token, _ := utils.GenerateToken(loginInput.Email, os.Getenv("TOKEN_SECRET"))
+	ResponseJSON(c, http.StatusOK, "User login successful", token)
 }
 
 func CreateTodo(c *gin.Context) {
