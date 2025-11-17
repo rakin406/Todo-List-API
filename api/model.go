@@ -12,6 +12,11 @@ type User struct {
 	Password string    `json:"password" gorm:"not null"`
 }
 
+type LoginInput struct {
+	Email    string `json:"email" gorm:"not null"`
+	Password string `json:"password" gorm:"not null"`
+}
+
 type Todo struct {
 	ID          uint   `json:"id" gorm:"primaryKey"`
 	Title       string `json:"title"`
