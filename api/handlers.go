@@ -4,10 +4,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 	"todo_list_api/utils"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -15,13 +15,8 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
-
 	dsn := os.Getenv("DB_URL")
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	DB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
@@ -32,7 +27,7 @@ func InitDB() {
 	}
 }
 
-func CreateUser(c *gin.Context) {
+func RegisterUser(c *gin.Context) {
 	var user User
 
 	// Bind the request body
@@ -45,8 +40,13 @@ func CreateUser(c *gin.Context) {
 	user.Password, _ = utils.HashPassword(user.Password)
 
 	DB.Create(&user)
-	// TODO: Create JWT token if registration is successful
-	ResponseJSON(c, http.StatusCreated, "Todo created successfully", user)
+
+	// Generate JWT token
+	// TODO: Avoid parsing expiry on every request
+	expiry, _ := time.ParseDuration(os.Getenv("TOKEN_EXPIRY"))
+	token, _ := utils.GenerateToken(expiry, user.ID, os.Getenv("TOKEN_SECRET"))
+
+	ResponseJSON(c, http.StatusCreated, "User registration successful", token)
 }
 
 func CreateTodo(c *gin.Context) {
