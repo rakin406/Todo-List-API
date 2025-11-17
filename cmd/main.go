@@ -19,6 +19,7 @@ func main() {
 
 	// Routes
 	router.POST("/register", api.RegisterUser)
+	router.POST("/login", api.LoginUser)
 	router.POST("/todos", api.CreateTodo)
 	router.GET("/todos", api.GetTodos)
 	router.PUT("/todos/:id", api.UpdateTodo)
