@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"todo_list_api/api"
+	"todo_list_api/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -20,10 +21,10 @@ func main() {
 	// Routes
 	router.POST("/register", api.RegisterUser)
 	router.POST("/login", api.LoginUser)
-	router.POST("/todos", api.CreateTodo)
-	router.GET("/todos", api.GetTodos)
-	router.PUT("/todos/:id", api.UpdateTodo)
-	router.DELETE("/todos/:id", api.DeleteTodo)
+	router.POST("/todos", middleware.DeserializeUser(), api.CreateTodo)
+	router.GET("/todos", middleware.DeserializeUser(), api.GetTodos)
+	router.PUT("/todos/:id", middleware.DeserializeUser(), api.UpdateTodo)
+	router.DELETE("/todos/:id", middleware.DeserializeUser(), api.DeleteTodo)
 
 	router.Run(":8080")
 }
